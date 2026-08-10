@@ -1,74 +1,106 @@
 # NBER Weekly Reader
 
-每周从 NBER 官方目录中挑选已经超过18个月开放期、尚未推送过且符合个人兴趣的 Working Papers，并通过电子邮件发送。
+NBER Weekly Reader sends a personalized weekly email containing open-access NBER Working Papers. It is designed for readers who enjoy NBER's weekly discovery format but prefer papers that are already outside the 18-month access window.
 
-## 它如何工作
+The application uses NBER's official weekly metadata and does not bypass any access restriction.
 
-1. 从 NBER 官方、每周更新的 TSV 元数据读取标题、摘要、作者、日期和研究项目。
-2. 只保留发布超过18个月的论文，不尝试绕过任何访问限制。
-3. 主体选择刚刚跨过18个月开放线的最新一周，再加入少量全历史高匹配论文。
-4. 根据主题词、NBER Program、喜欢的作者及示例论文评分。
-5. 排除已发送的论文，生成带摘要和免费 PDF 链接的邮件；同一自然周不会重复发送。
+## What it does
 
-## 初次设置
+Each issue contains 13 papers:
 
-1. 安装 Python 3.10 或更高版本。本程序只使用 Python 标准库。
-2. 将 `config.example.json` 复制为 `config.json`。
-3. 编辑 `config.json`：填写兴趣和邮箱。
-4. 如果使用 Gmail，请在 Google 账户开启两步验证并创建“应用专用密码”，不要填写日常登录密码。
-5. 在 Windows PowerShell 中设置密码：
+- 10 papers from the latest NBER release batch that has crossed the 18-month open-access threshold;
+- 3 highly relevant papers selected from the older archive.
+
+Papers are ranked using preferred topics, NBER program codes, authors, and example paper titles. Successfully delivered papers are recorded locally so they are not recommended again.
+
+The email includes:
+
+- a clickable table of contents;
+- titles, authors, release dates, and recommendation reasons;
+- abstract excerpts;
+- direct links to the free NBER PDF and abstract page.
+
+## Application files
+
+The production application is [`nber_digest.py`](nber_digest.py). The other files provide configuration and Windows automation:
+
+- `config.example.json` — safe configuration template;
+- `run_preview.bat` — builds an HTML preview without sending email;
+- `run_send.bat` — refreshes metadata and sends the weekly email;
+- `install_startup_task.ps1` — creates a Windows logon task;
+- `.gitignore` — prevents private configuration, history, previews, and cached data from being committed.
+
+## Requirements
+
+- Python 3.10 or later;
+- internet access to download NBER metadata;
+- an SMTP-enabled email account. Gmail is supported through an app password.
+
+The program uses only the Python standard library.
+
+## Setup
+
+1. Copy `config.example.json` to `config.json`.
+2. Edit `config.json` with your interests and email settings.
+3. If you use Gmail, enable two-step verification and create an app password. Do not use your normal Google account password.
+4. Store the app password in an environment variable:
 
    ```powershell
-   setx NBER_SMTP_PASSWORD "你的应用专用密码"
+   setx NBER_SMTP_PASSWORD "your-app-password"
    ```
 
-   设置后重新打开终端。
+5. Sign out of Windows and sign in again so the new environment variable is available.
 
-## 先预览，不发送
+Never put the app password directly in `config.json`.
 
-双击 `run_preview.bat`，或者运行：
+## Preview an issue
+
+Double-click `run_preview.bat`, or run:
 
 ```powershell
 python nber_digest.py --config config.json --refresh
 ```
 
-程序会生成 `preview.html`，但不会把论文记为已发送。
+This creates `preview.html` without sending an email or updating the delivery history.
 
-## 发送邮件
+## Send an issue
 
 ```powershell
 python nber_digest.py --config config.json --refresh --send
 ```
 
-只有发送成功后，论文才会写入 `state.json`，以后不会重复推荐。
+The delivery history is updated only after the email is sent successfully. The application also prevents more than one delivery in the same ISO calendar week unless `--force` is supplied.
 
-## 每周自动运行（Windows）
+## Run automatically on Windows
 
-打开“任务计划程序”，创建基本任务：
+After configuring the Gmail app password, run `install_startup_task.ps1` in PowerShell. It creates a task named **NBER Weekly Reader** that runs at Windows logon.
 
-- 触发器：每周一次，例如星期一上午8点；
-- 操作：启动 `run_send.bat`；
-- “起始于”填写本文件夹的完整路径；
-- 确保执行任务的 Windows 账户能够读取 `NBER_SMTP_PASSWORD`。
+Because the application enforces one delivery per calendar week, restarting or signing in multiple times during the same week will not send duplicate issues. The computer must be on and connected to the internet when the task runs.
 
-电脑在执行时需要开机并联网。若需要电脑关机时也能运行，可改用 GitHub Actions 或云服务器，并将邮箱应用密码保存为加密 Secret。
+## Personalize recommendations
 
-也可以在完成 Gmail 应用密码设置后，用 PowerShell 运行 `install_startup_task.ps1`。它会创建一个登录时触发的任务；程序内置“每自然周最多发送一次”的保护，因此一周内多次开机不会重复发信。
+Edit the `preferences` section in `config.json`:
 
-## 调整兴趣
+- `topics` maps English phrases to weights; larger numbers mean stronger preferences;
+- `avoid_topics` lowers the score of papers containing unwanted phrases;
+- `programs` contains NBER program codes such as `ME`, `IFM`, `AP`, and `EFG`;
+- `authors` prioritizes selected researchers;
+- `liked_papers` learns vocabulary from NBER Working Paper IDs such as `w12345`;
+- `liked_titles` learns from paper titles, including papers that are not yet NBER Working Papers.
 
-- `topics`：短语与权重，数字越大越重要；可填写中英文，但 NBER 摘要主要是英文。
-- `avoid_topics`：出现后大幅降权。
-- `programs`：优先的 NBER 研究项目代码，例如货币经济学为 `ME`、国际金融与宏观经济学为 `IFM`。论文摘要页会列出所属项目。
-- `authors`：喜欢的作者姓名。
-- `liked_papers`：喜欢的论文编号，例如 `w12345`。程序会从这些论文的标题和摘要中学习常见词。
-- `liked_titles`：喜欢的论文标题；即使尚未成为 NBER Working Paper，也可以用于建立兴趣画像。
+## Privacy and repository safety
 
-建议先运行几次预览，再调整权重。删除 `state.json` 会清除推送历史。
+The following files and directories are intentionally excluded from Git:
 
-## 隐私与安全
+- `config.json`, which may contain a personal email address;
+- `state.json`, which contains delivery history;
+- `preview.html`;
+- downloaded metadata under `data/`;
+- Python bytecode and cache directories.
 
-- 配置文件里不保存邮箱密码；密码从环境变量读取。
-- 不要把包含 `config.json`、`state.json` 或密码的文件上传到公开仓库。
-- 邮件中的摘要来自 NBER 元数据，PDF 链接指向 NBER 官方网站。
+SMTP credentials are read only from the `NBER_SMTP_PASSWORD` environment variable.
+
+## Data source
+
+Metadata comes from the official [NBER Working Papers and Chapters Metadata](https://www.nber.org/research/data/nber-working-papers-and-chapters-metadata) dataset. Paper and PDF links point directly to NBER.
 

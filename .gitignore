@@ -1,0 +1,7 @@
+config.json
+state.json
+preview.html
+data/
+__pycache__/
+*.pyc
+

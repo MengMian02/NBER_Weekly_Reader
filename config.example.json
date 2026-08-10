@@ -1,0 +1,39 @@
+{
+  "selection": {
+    "papers_per_week": 13,
+    "newly_open_papers": 10,
+    "open_access_months": 18,
+    "earliest_date": "1990-01-01"
+  },
+  "preferences": {
+    "topics": {
+      "monetary policy": 6,
+      "inflation": 5,
+      "exchange rates": 4,
+      "international finance": 4,
+      "China": 3,
+      "economic history": 2
+    },
+    "avoid_topics": [
+      "clinical trial"
+    ],
+    "programs": [
+      "ME",
+      "IFM"
+    ],
+    "authors": [],
+    "liked_papers": []
+  },
+  "email": {
+    "smtp_host": "smtp.gmail.com",
+    "smtp_port": 465,
+    "username": "your-address@gmail.com",
+    "from": "your-address@gmail.com",
+    "to": "your-address@gmail.com",
+    "password_env": "NBER_SMTP_PASSWORD"
+  },
+  "cache_dir": "data",
+  "state_file": "state.json",
+  "preview_file": "preview.html"
+}
+

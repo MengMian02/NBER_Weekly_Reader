@@ -27,7 +27,7 @@ The production application is [`nber_digest.py`](nber_digest.py). The other file
 - `config.example.json` — safe configuration template;
 - `run_preview.bat` — builds an HTML preview without sending email;
 - `run_send.bat` — refreshes metadata and sends the weekly email;
-- `install_startup_task.ps1` — creates a Windows logon task;
+- `install_startup_task.ps1` — creates a per-user Windows startup shortcut;
 - `.gitignore` — prevents private configuration, history, previews, and cached data from being committed.
 
 ## Requirements
@@ -73,9 +73,13 @@ The delivery history is updated only after the email is sent successfully. The a
 
 ## Run automatically on Windows
 
-After configuring the Gmail app password, run `install_startup_task.ps1` in PowerShell. It creates a task named **NBER Weekly Reader** that runs at Windows logon.
+After configuring the Gmail app password, run `install_startup_task.ps1` in PowerShell. It creates a shortcut named **NBER Weekly Reader** in the current user's Windows Startup folder. This does not require administrator access.
 
 Because the application enforces one delivery per calendar week, restarting or signing in multiple times during the same week will not send duplicate issues. The computer must be on and connected to the internet when the task runs.
+
+To disable automatic startup, press `Win + R`, enter `shell:startup`, and delete the **NBER Weekly Reader** shortcut. This does not remove the application, configuration, or delivery history.
+
+The installer intentionally uses the per-user Startup folder instead of Windows Task Scheduler. This avoids administrator requirements and `0x80070005 Access Denied` errors on systems where standard users cannot register scheduled tasks.
 
 ## Personalize recommendations
 

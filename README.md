@@ -15,6 +15,7 @@ Papers are ranked using preferred topics, NBER program codes, authors, and examp
 
 The email includes:
 
+- a topic-distribution summary showing the main subjects covered in the issue;
 - a clickable table of contents;
 - titles, authors, release dates, and recommendation reasons;
 - abstract excerpts;
@@ -107,4 +108,17 @@ SMTP credentials are read only from the `NBER_SMTP_PASSWORD` environment variabl
 ## Data source
 
 Metadata comes from the official [NBER Working Papers and Chapters Metadata](https://www.nber.org/research/data/nber-working-papers-and-chapters-metadata) dataset. Paper and PDF links point directly to NBER.
+
+## Roadmap
+
+Planned and exploratory improvements are tracked as GitHub Issues. Current ideas include:
+
+- [reader feedback controls and preference learning](https://github.com/MengMian02/NBER_Weekly_Reader/issues/1);
+- [stronger semantic similarity and topic-diversity ranking](https://github.com/MengMian02/NBER_Weekly_Reader/issues/2);
+- [structured `Method`, `Data`, and `Why it matters` summaries](https://github.com/MengMian02/NBER_Weekly_Reader/issues/3);
+- [PDF availability checks, retry handling, and run logs](https://github.com/MengMian02/NBER_Weekly_Reader/issues/4);
+- [an interactive setup wizard](https://github.com/MengMian02/NBER_Weekly_Reader/issues/5);
+- [a searchable archive of previously delivered issues](https://github.com/MengMian02/NBER_Weekly_Reader/issues/6).
+
+Items in this list describe possible future work rather than committed release dates. Completed features are documented in the main sections above.
 

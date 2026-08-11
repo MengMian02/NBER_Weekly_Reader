@@ -254,7 +254,7 @@ def render_email(papers: list[Paper], today: dt.date) -> tuple[str, str, str]:
     for i, p in enumerate(papers, 1):
         reason = "、".join(p.reasons[:4]) or "综合匹配"
         group = "刚开放的一周" if p.issue_date == newest else "历史精选"
-        toc.append(f'<a href="#paper-{i}" style="display:block;padding:10px 0;border-bottom:1px solid #e5e7eb;color:#102a43;text-decoration:none"><span style="color:#829ab1;margin-right:8px">{i:02d}</span>{html.escape(p.title)}</a>')
+        toc.append(f'<a href="{p.pdf_url}" target="_blank" rel="noopener noreferrer" style="display:block;padding:10px 0;border-bottom:1px solid #e5e7eb;color:#102a43;text-decoration:none"><span style="color:#829ab1;margin-right:8px">{i:02d}</span>{html.escape(p.title)}<span style="color:#2f80ed;margin-left:7px">↗</span></a>')
         plain_lines += [
             f"{i}. {p.title}",
             f"作者：{p.authors or '未列出'} · {p.issue_date:%Y-%m} · 匹配：{reason}",
@@ -280,7 +280,7 @@ def render_email(papers: list[Paper], today: dt.date) -> tuple[str, str, str]:
         <p style="margin:0;color:#d9e2ec;line-height:1.6">追踪刚跨过18个月开放线的论文，并加入少量与你交易与实证研究兴趣高度匹配的历史精选。</p>
       </header>
       <section style="margin:20px 0 28px;padding:22px 24px;background:white;border-radius:14px;border:1px solid #d9e2ec">
-        <div style="font-size:13px;font-weight:700;color:#627d98;margin-bottom:8px">本期目录 · 点击标题跳转</div>
+        <div style="font-size:13px;font-weight:700;color:#627d98;margin-bottom:8px">本期目录 · 点击标题打开免费 PDF</div>
         {''.join(toc)}
       </section>
       <section>{''.join(cards)}</section>

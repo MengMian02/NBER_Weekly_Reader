@@ -245,9 +245,26 @@ def excerpt(text: str, length: int = 520) -> str:
     return clean if len(clean) <= length else clean[:length].rsplit(" ", 1)[0] + "…"
 
 
+def topic_distribution(papers: list[Paper], limit: int = 7) -> list[tuple[str, int]]:
+    """Return the most common human-readable recommendation topics."""
+    counts: Counter[str] = Counter()
+    for paper in papers:
+        for reason in set(paper.reasons):
+            if reason == "与你喜欢的论文相似" or re.fullmatch(r"[A-Z]{2,5}", reason):
+                continue
+            counts[reason] += 1
+    return counts.most_common(limit)
+
+
 def render_email(papers: list[Paper], today: dt.date) -> tuple[str, str, str]:
     subject = f"本周 NBER 免费论文精选 · {today.isoformat()}"
-    plain_lines = [subject, "", "这些论文均已超过 NBER 的18个月开放期。", ""]
+    distribution = topic_distribution(papers)
+    distribution_text = " · ".join(f"{topic.title()} {count}" for topic, count in distribution)
+    plain_lines = [subject, "", "这些论文均已超过 NBER 的18个月开放期。"]
+    if distribution_text:
+        plain_lines.extend([f"本期主题：{distribution_text}", ""])
+    else:
+        plain_lines.append("")
     cards = []
     toc = []
     newest = max(p.issue_date for p in papers)
@@ -272,12 +289,17 @@ def render_email(papers: list[Paper], today: dt.date) -> tuple[str, str, str]:
           <a href="{p.pdf_url}" style="display:inline-block;padding:10px 15px;background:#102a43;color:white;text-decoration:none;border-radius:8px;font-weight:700">阅读免费 PDF</a>
           <a href="{p.page_url}" style="margin-left:14px;color:#2f80ed;text-decoration:none">NBER 摘要页 →</a>
         </article>""")
+    topic_pills = "".join(
+        f'<span style="display:inline-block;margin:5px 6px 0 0;padding:7px 10px;background:#eaf2ff;color:#1d4f91;border-radius:999px;font-size:12px;font-weight:700">{html.escape(topic.title())} · {count}</span>'
+        for topic, count in distribution
+    )
     html_body = f"""<!doctype html><html><body style="margin:0;background:#f0f4f8;font-family:Arial,'Microsoft YaHei',sans-serif;color:#102a43">
       <div style="max-width:760px;margin:0 auto;padding:32px 16px">
       <header style="padding:30px;background:linear-gradient(135deg,#102a43,#243b53);border-radius:16px;color:white">
         <div style="font-size:12px;letter-spacing:.12em;color:#9fb3c8">NBER WEEKLY READER</div>
         <h1 style="font-size:29px;margin:10px 0 8px">本周免费论文精选</h1>
         <p style="margin:0;color:#d9e2ec;line-height:1.6">追踪刚跨过18个月开放线的论文，并加入少量与你交易与实证研究兴趣高度匹配的历史精选。</p>
+        <div style="margin-top:17px"><div style="font-size:11px;letter-spacing:.08em;color:#9fb3c8;margin-bottom:2px">本期主题分布</div>{topic_pills}</div>
       </header>
       <section style="margin:20px 0 28px;padding:22px 24px;background:white;border-radius:14px;border:1px solid #d9e2ec">
         <div style="font-size:13px;font-weight:700;color:#627d98;margin-bottom:8px">本期目录 · 点击标题打开免费 PDF</div>
